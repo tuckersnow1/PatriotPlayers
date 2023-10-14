@@ -1,0 +1,2 @@
+"Lr42al1zSJYjBufV"
+mongodb+srv://user_as32:<Lr42al1zSJYjBufV>@cluster0.g0jcovc.mongodb.net/Auth_PPlayers?retryWrites=true&w=majority
