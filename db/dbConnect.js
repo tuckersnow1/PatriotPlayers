@@ -22,4 +22,4 @@ async function dbConnect() {
 	  });
       }
       
-      module.exports = dbConnect;
+module.exports = dbConnect;

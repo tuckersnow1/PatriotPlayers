@@ -10,6 +10,9 @@ const auth = require("./auth");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+/*
+Basic endpoint for server testing.
+*/
 app.get("/", (request, response, next) => {
   response.json({ message: "Hey! This is your server response!" });
   next();
@@ -20,6 +23,14 @@ const dbConnect = require("./db/dbConnect");
 
 // execute database connection 
 dbConnect();
+
+/**
+ * This method configures all the CORS and HTTP headers/methods.
+ * The 1st setHeader specifies from which origins can make requests to our server. We have set this to anywhere for now.
+ * 2nd setHeader -> Which HTTP headers can be used.
+ * 3rd setHeader -> Specifies Which HTTP methods are allowed for those requests
+ * next() -> calls next method in stack.
+ */
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
@@ -32,27 +43,27 @@ app.use((req, res, next) => {
   );
   next();
 });
-
+/*
+       create a new user instance and collect the data
+       save the new user
+       return success if the new user is added to the database successfully
+       catch error if the new user wasn't added successfully to the database
+*/
 app.post("/register", (request, response) => {
   bcrypt.hash(request.body.password, 10)
     .then((hashedPassword) => {
-      // create a new user instance and collect the data
       const user = new User({
         username: request.body.username,
         password: hashedPassword,
       });
-
-      // save the new user
       user
         .save()
-        // return success if the new user is added to the database successfully
         .then((result) => {
           response.status(201).send({
             message: "User Created Successfully",
             result,
           });
         })
-        // catch error if the new user wasn't added successfully to the database
         .catch((error) => {
           response.status(500).send({
             message: "Error creating user",
@@ -60,23 +71,26 @@ app.post("/register", (request, response) => {
           });
         });
     })
-
     .catch((e) => {
       response.status(500).send({
         message: "Password was not hashed successfully",
         e,
       });
     });
-
 });
 
+
+/*
+User collection attempts to find username in db which matches the one in the user's request
+Using the bcrypt method to decrypt the encrypted password in the database and check if it matches the one from the request
+If password not matches, then Exception thrown for incorrect password
+Else, the user is granted a special Json Web Token (JWT) which authenticates and authorizes the user
+*/
 app.post("/login", (request, response) => {
   User.findOne({ username: request.body.username })
     .then((user) => {
       bcrypt.compare(request.body.password, user.password)
         .then((passwordCheck) => {
-
-          // check if password matches
           if (!passwordCheck) {
             return response.status(400).send({
               message: "Incorrect Password",
@@ -84,7 +98,6 @@ app.post("/login", (request, response) => {
             });
           }
           else {
-            //   create JWT token
             const token = jwt.sign(
               {
                 userId: user._id,
@@ -93,7 +106,6 @@ app.post("/login", (request, response) => {
               "RANDOM-TOKEN",
               { expiresIn: "24h" }
             );
-            //   return success response
             response.status(200).send({
               message: "Login Successful",
               username: user.username,
@@ -114,13 +126,11 @@ app.post("/login", (request, response) => {
         e,
       });
     });
-
 });
 app.get("/free-endpoint", (request, response) => {
   response.json({ message: "You are free to access me anytime" });
 });
 
-// authentication endpoint
 app.get("/auth-endpoint", auth, (request, response) => {
   response.json({ message: "You are authorized to access me" });
 });
