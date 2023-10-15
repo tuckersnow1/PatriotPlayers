@@ -1,6 +1,8 @@
 const { MongoClient } = require('mongodb');
+const dbConnect = require('./db/dbConnect');
+require('dotenv').config()
 
-const uri = "mongodb+srv://quangasaurusrex:wKV6suTi7Mq1P6KQ@cluster0.bekfnez.mongodb.net/?retryWrites=true&w=majority";
+const uri = process.env.DB_URL
 const client = new MongoClient(uri);
 
 async function main() {

@@ -17,7 +17,7 @@ const LobbySchema = new mongoose.Schema({
 		unique:false,
 	},
 	maxPlayers:{
-		type:Integer,
+		type: Number,
 		required: "Please enter in number of max players for lobby",
 		unique:false,
 	}}

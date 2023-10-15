@@ -65,14 +65,14 @@ app.post("/register", (request, response) => {
           });
         })
         .catch((error) => {
-          response.status(500).send({
+          response.status(400).send({
             message: "Error creating user",
             error,
           });
         });
     })
     .catch((e) => {
-      response.status(500).send({
+      response.status(400).send({
         message: "Password was not hashed successfully",
         e,
       });
