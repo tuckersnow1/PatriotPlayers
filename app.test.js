@@ -1,11 +1,38 @@
 const request = require('supertest');
 const jwt = require('jsonwebtoken');
 const User = require("./db/userModel");
+const Lobby = require("./db/lobbyModel")
 const auth = require("./auth");
 const { JsonWebTokenError } = require('jsonwebtoken');
-
+const {ObjectId} = require('mongodb')
+const{MongoClient} = require('mongodb')
 jest.mock("./db/userModel");
 
+mongo_uri = process.env.DB_URL
+dbName = "Auth_PPlayers"
+describe('save-lobby', () => {
+  let connection;
+  let db;
+
+  beforeAll(async () => {
+    connection = await MongoClient.connect(mongo_uri. {
+      useNewUrlParser:true,
+      useUnifiedTopology: true
+    })
+    db = await connection.db(dbName)
+  });
+  afterAll(async()=>{
+    await connection.close();
+  })
+  it('should insert lobby into the lobby collection', async()=>{
+    const lobby = db.collection('lobbies')
+    const mockLobby = new Lobby({roomTitle: 'room', gameTitle: 'game', body:'test description', maxPlayers: 3,})
+    await lobby.insertOne(mockLobby);
+
+    const insertedLobby = await users.findOne({_id: 'some-user-id'});
+    expect(insertedLobby).toEqual(lobby);
+  });
+})
 describe('GET /', () => {
   it('should respond with a message', async () => {
     const res = await request(app)
