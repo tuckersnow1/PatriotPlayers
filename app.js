@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 });
 
 
-async function insertLobby(roomTitle, gameTitle, body, maxPlayers) {
+async function insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre) {
   try{
     const insertedLobby = new Lobby({
       roomTitle: roomTitle,
@@ -55,6 +55,8 @@ async function insertLobby(roomTitle, gameTitle, body, maxPlayers) {
       body: body,
       maxPlayers: maxPlayers,
       currentPlayers: 0,
+      rank: rank,
+      genre: genre,
       date: Date(),
     });
     await insertedLobby.save(); // Return the created lobby
@@ -65,10 +67,10 @@ async function insertLobby(roomTitle, gameTitle, body, maxPlayers) {
   
 }
 app.post('/create-lobby', async (req, res) => {
-  const { roomTitle, gameTitle, body, maxPlayers } = req.body;
+  const { roomTitle, gameTitle, body, maxPlayers, rank, genre } = req.body;
   
   try {
-    const lobby = await insertLobby(roomTitle, gameTitle, body, maxPlayers);
+    const lobby = await insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre);
     res.status(201).json(lobby);
     
   } catch (e) {
