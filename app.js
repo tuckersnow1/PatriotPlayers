@@ -83,9 +83,11 @@ app.get('/search', async(req, res)=> {
   let request = req;
   let response = res;
   try{
-    const query = request.body;
+    let query = request.body;
     if(query!=null){
-      var lobbies = await Lobby.find(query).sort({roomTitle:1})
+      var lobbies = await Lobby.find(query).sort({"roomTitle":1})
+      // var lobbies = await Lobby.find(query).sort({filter: 1});
+      console.log(lobbies);
       if(lobbies.length==0) {
         return response.status(400).send({
           message: "No matching lobbies",
@@ -102,13 +104,44 @@ app.get('/search', async(req, res)=> {
     }}
     catch(error){
       response.status(400).send({
-        message: "Error searching lobbies: Invalid Query or Lobbies don't exist",
+        message: "No Lobbies found",
         error: error.message,
       });
     };
   
+  });
+  
+  
+  app.get('/filter', async(req, res)=> {
+    try {
+    const filter = req.body.filter;
+    const order = req.body.order;
+    const query = req.body.query;
+    if(req.body!=null){
+      if(filter==null){
+        var lobbies = await Lobby.find(query).sort([["gameTitle", 1]])
+      }
+      else{
+        var lobbies = await Lobby.find(query).sort([[filter, order]])
+      }
+      res.status(201).json({
+        message: "Lobbies filtered successfully",
+        data: lobbies,
+      });
+    }
+    else{
+      res.status(400).send({
+        message: "Please enter a valid filter.",
+      });
+    }
+  }
+  catch(error){
+    res.status(400).send({
+      message: "No Lobbies Found.",
+      error: error.message,
+    });
+  };
 });
-
 /*
 create a new user instance and collect the data
 save the new user
