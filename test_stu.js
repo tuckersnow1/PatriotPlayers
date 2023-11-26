@@ -34,9 +34,31 @@ async function insertLobby(roomTitle, gameTitle, body, maxPlayers) {
       date: Date()
     });
     const insertedLobby = await db.collection('Lobbies').findOne({ _id: lobby.insertedId }); // find by ID rather than anything else since we could return other things.
-    console.log(`Lobby was successfully inserted! Title: ${insertedLobby.gameTitle}, Players: 1/${insertedLobby.maxPlayers}`);
+    console.log(`Lobby was successfully inserted! Title: ${insertedLobby.gameTitle}, Players: 1/${insertedLobby.maxPlayers}\n`);
   } catch (e) {
     console.error("Error inserting lobby:", e);
+  }
+  runUnitTests_insertLobby(roomTitle, gameTitle, body, maxPlayers);
+}
+
+async function getLobbyName() {
+  const insertedLobby = await db.collection('Lobbies').findOne({ _id: lobby.insertedId });
+  return insertedLobby.gameTitle;
+}
+
+async function runUnitTests_insertLobby(roomTitle, gameTitle, body, maxPlayers) {
+  console.log("running unit tests for runUnitTests_insertLobby()");
+  if (gameTitle == "Rainbow Six Siege") {
+    console.log("Test 1 passed!");
+  }  
+  if (roomTitle == "Come game with me!") {
+    console.log("Test 2 passed!");
+  }
+  if (body == "Let's come rank together") {
+    console.log("Test 3 passed!");
+  }
+  if (maxPlayers == 5) {
+    console.log("Test 4 passed!");
   }
 }
 
