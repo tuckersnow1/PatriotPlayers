@@ -142,6 +142,21 @@ app.get('/search', async(req, res)=> {
     });
   };
 });
+  app.get('/popular', async(req, res)=> {
+    try {
+      var lobbies = await Lobby.find(query).sort([["currentPlayers", 1]])
+      res.status(201).json({
+        message: "Lobbies filtered successfully",
+        data: lobbies,
+      });
+  }
+  catch(error){
+    res.status(400).send({
+      message: "No Lobbies Found or Invalid Request.",
+      error: error.message,
+    });
+  };
+});
 /*
 create a new user instance and collect the data
 save the new user
