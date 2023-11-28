@@ -15,7 +15,7 @@ describe('save-lobby', () => {
   let db;
 
   beforeAll(async () => {
-    connection = await MongoClient.connect(mongo_uri. {
+    connection = await MongoClient.connect(mongo_uri, {
       useNewUrlParser:true,
       useUnifiedTopology: true
     })
