@@ -330,41 +330,4 @@ app.post("/login", (request, response) => {
       response.json({ message: "You are authorized to access me" });
     });
     module.exports = app;
-    
-    // async function insertLobby(roomTitle, gameTitle, body, maxPlayers) {
-    //   try {
-    
-    //     const lobby = new Lobby({
-    //         roomTitle: roomTitle,
-    //         gameTitle: gameTitle,
-    //         body: body,
-    //         maxPlayers: maxPlayers,
-    //         date: Date()
-    //     })
-    //     lobby
-    //     .save()
-    //         .then((result) => {
-    //           response.status(201).send({
-    //             message: "Lobby Created Successfully",
-    //             result,
-    //           });
-    //         })
-    //         .catch((error) => {
-    //           response.status(400).send({
-    //             message: "Please make sure you enter valid attributes when creating a",
-    //             error,
-    //           });
-    //         });
-    //     // const lobby = await db.collection('Lobbies').insertOne({
-    //     //   roomTitle: roomTitle,
-    //     //   gameTitle: gameTitle,
-    //     //   body: body,
-    //     //   maxPlayers: maxPlayers,
-    //     //   date: Date()
-    //     // });
-    //     const insertedLobby = null; // find by ID rather than anything else since we could return other things.
-    //     console.log(`Lobby was successfully inserted! Title: ${insertedLobby.gameTitle}, Players: 1/${insertedLobby.maxPlayers}`);
-    //   } catch (e) {
-    //     console.error("Error inserting lobby:", e);
-    //   }
-    // }
+  
