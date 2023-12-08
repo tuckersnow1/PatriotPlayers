@@ -47,6 +47,7 @@ app.use((req, res, next) => {
 });
 
 
+
 async function insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre) {
   try{
     const insertedLobby = new Lobby({
@@ -79,6 +80,86 @@ app.post('/create-lobby', async (req, res) => {
   }
 });
 
+app.delete('/remove-lobby', async (req, res) => {
+  try {
+      const lobbyId = req.body.id; // Get lobby ID from the request body
+      const lobby = await Lobby.findByIdAndDelete(lobbyId); // Delete the lobby from the database
+
+      res.status(201).json(lobby); // Send back the deleted lobby data
+  } catch (error) {
+      res.status(400).json({ message: error.message });
+  }
+})
+
+
+app.put('/increasePlayers', async(req, res) => {
+  let request = req;
+  let response = res;
+  try{
+    let lobbyName = request.body.lobbyName;
+    if(lobbyName!=null){
+      var lobby = await Lobby.findOne({roomTitle: lobbyName});
+      console.log(lobby);
+      if(lobby.length==0) {
+        return response.status(400).send({
+          message: "No matching lobbies",
+          error,
+        });
+      }
+      else{
+        if(lobby.currentPlayers<lobby.maxPlayers){
+          lobby.currentPlayers+=1
+        }
+        else if(lobby.currentPlayers==lobby.maxPlayers){
+           response.status(400).send({
+            message: "Cannot be added because lobby has reached max capacity. Please wait or join another lobby",
+          });
+        }
+      }
+    }
+  }
+  catch(error){
+    res.status(400).send({
+      message: "Could not complete operation.",
+      error: error.message,
+    });
+  };
+
+})
+app.put('/decreasePlayers', async(req, res) => {
+  let request = req;
+  let response = res;
+  try{
+    let lobbyName = request.body.lobbyName;
+    if(lobbyName!=null){
+      var lobby = await Lobby.findOne({roomTitle: lobbyName});
+      console.log(lobby);
+      if(lobby.length==0) {
+        return response.status(400).send({
+          message: "No matching lobbies",
+          error,
+        });
+      }
+      else{
+        if(lobby.currentPlayers>0){
+          lobby.currentPlayers-=1
+        }
+        else if(lobby.currentPlayers==0){
+           response.status(400).send({
+            message: "Cannot be removed because lobby size is zero.",
+          });
+        }
+      }
+    }
+  }
+  catch(error){
+    res.status(400).send({
+      message: "Could not complete operation.",
+      error: error.message,
+    });
+  };
+
+})
 app.get('/search', async(req, res)=> {
   let request = req;
   let response = res;
@@ -144,7 +225,7 @@ app.get('/search', async(req, res)=> {
 });
   app.get('/popular', async(req, res)=> {
     try {
-      var lobbies = await Lobby.find(query).sort([["currentPlayers", 1]])
+      var lobbies = await Lobby.find({}).sort([["currentPlayers", -1]])
       res.status(201).json({
         message: "Lobbies filtered successfully",
         data: lobbies,
