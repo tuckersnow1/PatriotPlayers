@@ -9,6 +9,8 @@ const client = require('./bot.js');
 require('dotenv').config()
 const auth = require("./auth");
 var session = require('express-session')
+const client = require("./bot.js");
+const discordClient = client;
 
 /* Client Variables */
 const client_id = '1154142275711021217'; // Paste your bot's ID here
@@ -146,13 +148,25 @@ app.post('/create-lobby', async (req, res) => {
   try {
     const lobby = await insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre);
     res.status(201).json(lobby);
-    //insert client.emit
+    discordClient.emit('channel', roomTitle, 'voice', 'create');
     
   } catch (e) {
     console.error('Error:', e);
     res.status(400).json({ message: 'Error creating lobby' });
   }
 });
+
+app.post('/message-invite', async (req, res) => {
+  const { message, username } = req.body;
+
+  try {
+    discordClient.emit('sendDm', message, username);
+  }
+  catch(error){
+    res.status(400).json({message: error.message});
+  }
+})
+
 /**
  * Retrieves a lobby from the database and deletes it.
  * If the lobby cannot be found by its ID, an error is reported.
