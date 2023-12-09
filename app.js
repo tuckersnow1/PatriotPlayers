@@ -61,7 +61,7 @@ app.use((req, res, next) => {
 });
 
 
-/* This is for the Discord Oauth2 function*/
+/* Draft code for discord oauth2. This is for the Discord Oauth2 function*/
 app.post('/user', (req, res) => { // Will run when there are any incoming POST requests to http://localhost:(port)/user. Note that a POST request is different from a GET request, so this won't exactly work when you actually visit http://localhost:(port)/user
   /* Create our Form Data */
   const data_1 = new URLSearchParams(); // Create a new formData object with the constructor
