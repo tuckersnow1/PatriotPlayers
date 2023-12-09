@@ -17,7 +17,7 @@ module.exports = {
             }
 
             try{
-                const guild = await client.guilds.fetch(server_id); // get the server id
+                const guild = await client.guilds.fetch(server_id); // get the server
 
                 var category = (channel_type == 'voice') ? lobby_voice : lobby_text;
                 var name = (channel_type == 'text') ? channel_name.toLowerCase().replace(/ /g, "-") : channel_name;             // make name match discord naming convention if necessary
