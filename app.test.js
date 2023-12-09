@@ -82,3 +82,53 @@ describe('POST /login', () => {
     expect(res.body.token).toBeDefined();
   });
 });
+
+describe('PUT /increasePlayers', () => {
+  it('Increases the player count of a lobby by 1', async () => {
+    // Create a test lobby
+    const testLobby = insertLobby('Test Lobby', 'R6S', 'body msg', 4, 'gold', 'action');
+
+    await testLobby.save();
+
+    // Send a request to increase the number of players
+    const res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+
+    // Check if the response has a status code of 200
+    expect(res.statusCode).toBe(200);
+
+    // Check if the number of players in the lobby has increased
+    const updatedLobby = await Lobby.findOne({ roomTitle: 'Test Lobby' });
+    expect(updatedLobby.currentPlayers).toBe(3);
+
+    // Clean up the test lobby
+    await testLobby.remove();
+  });
+});
+
+describe('POST /create-lobby', () => {
+  it('Should create a lobby and return the created lobby data', async () => {
+    const requestBody = {
+      roomTitle: 'Lobby 1',
+      gameTitle: 'R6s',
+      body: 'A lobby for R6s Ranked',
+      maxPlayers: 5,
+      rank: 'Diamond',
+      genre: 'Action',
+    };
+
+    const response = await request(app)
+      .post('/create-lobby')
+      .send(requestBody);
+
+    expect(response.statusCode).toBe(201);
+    expect(response.body).toHaveProperty('_id');
+    expect(response.body.roomTitle).toBe('Lobby 1');
+    expect(response.body.gameTitle).toBe('R6s');
+    expect(response.body.body).toBe('A lobby for R6s Ranked');
+    expect(response.body.maxPlayers).toBe(5);
+    expect(response.body.rank).toBe('Diamond');
+    expect(response.body.genre).toBe('Action');
+  });
+});
