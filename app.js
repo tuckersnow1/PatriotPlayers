@@ -6,16 +6,23 @@ const jwt = require("jsonwebtoken");
 const User = require("./db/userModel");
 const Lobby = require("./db/lobbyModel");
 const client = require('./bot.js'); 
-
+require('dotenv').config()
 const auth = require("./auth");
+var session = require('express-session')
+
 /* Client Variables */
 const client_id = '1154142275711021217'; // Paste your bot's ID here
-const client_secret = ''; // Paste your bot's secret here
+const client_secret = process.env.CLIENT_SECRET; // Paste your bot's secret here
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args)); // Import node-fetch asynchronously; see https://www.npmjs.com/package/node-fetch#installation for more info on why this is done.
 
 // body parser configuration
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  secret: process.env.CLIENT_SECRET,
+  resave: false,
+  saveUninitialized: true
+}))
 
 function make_config(authorization_token) { // Define the function
   data = { // Define "data"
@@ -60,29 +67,56 @@ app.use((req, res, next) => {
   next();
 });
 
+function requireLogin(req, res, next) {
+  if (req.session && req.session.user) {
+    // User is logged in, proceed to the next middleware or route handler
+    return next();
+  } else {
+    // Redirect or send an error response if the user is not logged in
+    res.redirect('/login');
+  }
+}
 
 /* Draft code for discord oauth2. This is for the Discord Oauth2 function*/
 app.post('/user', (req, res) => { // Will run when there are any incoming POST requests to http://localhost:(port)/user. Note that a POST request is different from a GET request, so this won't exactly work when you actually visit http://localhost:(port)/user
   /* Create our Form Data */
   const data_1 = new URLSearchParams(); // Create a new formData object with the constructor
-
+  const code = req.body;
   data_1.append('client_id', client_id); // Append the client_id variable to the data
   data_1.append('client_secret', client_secret); // Append the client_secret variable to the data
   data_1.append('grant_type', 'authorization_code'); // This field will tell the Discord API what you are wanting in your initial request.
   data_1.append('redirect_uri', `http://localhost:3000`); // This is the redirect URL where the user will be redirected when they finish the Discord login
   data_1.append('scope', 'identify'); // This tells the Discord API what info you would like to retrieve. You can change this to include guilds, connections, email, etc.
-  data_1.append('code', req.body) // This is a key parameter in our upcoming request. It is the code the user got from logging in. This will help us retrieve a token which we can use to get the user's info.
+  data_1.append('code', code) // This is a key parameter in our upcoming request. It is the code the user got from logging in. This will help us retrieve a token which we can use to get the user's info.
 
-  fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => { // Make a request to the Discord API with the form data, convert the response to JSON, then take it and run the following code.
-      axios.get("https://discord.com/api/users/@me", make_config(data.access_token)).then(response => { // Make a request yet again to the Discord API with the token from previously.
-          res.status(200).send(response.data.username); // Send the username with a status code 200.
+  fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json())
+  .then( 
+    async data => { 
+      const discordAccessTok = data.access_token;
+      // Make a request to the Discord API with the form data, convert the response to JSON, then take it and run the following code.
+      axios.get("https://discord.com/api/users/@me", make_config(discordAccessTok)).then(async response => { // Make a request yet again to the Discord API with the token from previously.
+        const discordUsername = response.data.username;
+        if(await User.findOne({ discordUsername })){
+          res.status(200).send("User exists.")
+        }
+        else{
+          const createdUser = new User({discordUsername});
+          createdUser.save()
+          res.status(200).send("Created user: " + response.data.username);
+        }
+        res.redirect('/login');
+        // return res.status(200).send(response.data.username); // Send the username with a status code 200.
       }).catch(err => { // Handle any errors in the request (such as 401 errors).
           console.log(err); // Log the error in the console
           res.sendStatus(500); // Send a 500 error.
       });
   });
 });
-
+/**
+ * This method attempts to insert a new lobby with attributes given by a user into the database.
+ * The attributes needed are: roomTitle, gameTitle, body, maxPlayers, rank, and genre.
+ * Logs a corresponding success or error message.
+ */
 async function insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre) {
   try{
     const insertedLobby = new Lobby({
@@ -102,6 +136,10 @@ async function insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre) 
   }
   
 }
+/**
+ * This endpoint uses the insertLobby function to create a Lobby with given attributes and save it.
+ * An error is reported if any error occurred during this process.
+ */
 app.post('/create-lobby', async (req, res) => {
   const { roomTitle, gameTitle, body, maxPlayers, rank, genre } = req.body;
   
@@ -115,7 +153,10 @@ app.post('/create-lobby', async (req, res) => {
     res.status(400).json({ message: 'Error creating lobby' });
   }
 });
-
+/**
+ * Retrieves a lobby from the database and deletes it.
+ * If the lobby cannot be found by its ID, an error is reported.
+ */
 app.delete('/remove-lobby', async (req, res) => {
   try {
       const lobbyId = req.body.id; // Get lobby ID from the request body
@@ -126,7 +167,10 @@ app.delete('/remove-lobby', async (req, res) => {
       res.status(400).json({ message: error.message });
   }
 })
-
+/**
+ * Retrieves user info from the database by their ID. 
+ * If the user info cannot be found by their ID, an error is reported.
+ */
 app.get('/get-user', async (req, res) => {
   try {
       // const user = await User.findOne({username:req.body.username}); // Find the user by their ID
@@ -136,6 +180,10 @@ app.get('/get-user', async (req, res) => {
       res.status(400).json({ message: error.message });
   }});
 
+  /**
+ * This endpoint increases the current player count in a lobby by one.
+ * It returns error messages if the lobby does not exist in the database or the increase would violate the lobby's maximum player count.
+ */
 app.put('/increasePlayers', async(req, res) => {
   let request = req;
   let response = res;
@@ -177,6 +225,10 @@ app.put('/increasePlayers', async(req, res) => {
   };
 
 })
+/**
+ * This endpoint decreases the current player count in a lobby by one.
+ * It returns error messages if the lobby does not exist in the database or the current player count is zero.
+ */
 app.put('/decreasePlayers', async(req, res) => {
   let request = req;
   let response = res;

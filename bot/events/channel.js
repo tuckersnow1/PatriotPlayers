@@ -1,6 +1,10 @@
 const { ChannelType } = require('discord.js');
 const { server_id, lobby_text, lobby_voice } = require('../botconfig.json');
-
+/**
+ * Creates a new voice or text channel on discord OR Removes an existing voice/text channel on discord.
+ * An error occurs when attempting to create/remove the 'general' channel.
+ * Errors are logged when trying to remove a channel that does not exist, remove a channel from a server that does not exist, or any other error during the process.
+ */
 module.exports = {
     name: 'channel',                // creates or removes channel with channel name of type channel_type 
     async execute(client, channel_name, channel_type, action) {

@@ -1,5 +1,9 @@
 const { server_id } = require('../botconfig.json');
-
+/**
+ * Enables sending direct messages to users.
+ * The given user is found from the provided server, then the message is sent to them.
+ * Logs an error if the server, members list, or specific user was not found.
+ */
 module.exports = {
     name: 'dm',             // send a the msg to the user with userid
     async execute(client, msg, username) {
