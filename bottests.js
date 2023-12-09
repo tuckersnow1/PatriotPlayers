@@ -5,7 +5,7 @@ function test() {
 
     setTimeout(function() {             // run 10 seconds after startup
 
-        client.emit('sendDm', "Hello 1", '431803299038232577');   // sends a private message "hello 1" to user with discord user id 
+        // client.emit('sendDm', "Hello 1", '431803299038232577');   // sends a private message "hello 1" to user with discord user id 
     
         client.emit('channel', 'Lobby Channel', 'voice', 'create');                 //  create a voice channel called Lobby Channel
 
@@ -20,6 +20,7 @@ function test() {
 
         client.emit('channel', 'Text Channel', 'text', 'delete');                   //  deletes a text channel called text Channel
         
+    
     }, 30000);
 
 

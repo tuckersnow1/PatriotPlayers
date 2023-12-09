@@ -5,12 +5,26 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("./db/userModel");
 const Lobby = require("./db/lobbyModel");
+const client = require('./bot.js'); 
 
 const auth = require("./auth");
+/* Client Variables */
+const client_id = '1154142275711021217'; // Paste your bot's ID here
+const client_secret = ''; // Paste your bot's secret here
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args)); // Import node-fetch asynchronously; see https://www.npmjs.com/package/node-fetch#installation for more info on why this is done.
 
 // body parser configuration
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+function make_config(authorization_token) { // Define the function
+  data = { // Define "data"
+      headers: { // Define "headers" of "data"
+          "authorization": `Bearer ${authorization_token}` // Define the authorization
+      }
+  };
+  return data; // Return the created object
+}
 
 /*
 Basic endpoint for server testing.
@@ -47,6 +61,27 @@ app.use((req, res, next) => {
 });
 
 
+/* This is for the Discord Oauth2 function*/
+app.post('/user', (req, res) => { // Will run when there are any incoming POST requests to http://localhost:(port)/user. Note that a POST request is different from a GET request, so this won't exactly work when you actually visit http://localhost:(port)/user
+  /* Create our Form Data */
+  const data_1 = new URLSearchParams(); // Create a new formData object with the constructor
+
+  data_1.append('client_id', client_id); // Append the client_id variable to the data
+  data_1.append('client_secret', client_secret); // Append the client_secret variable to the data
+  data_1.append('grant_type', 'authorization_code'); // This field will tell the Discord API what you are wanting in your initial request.
+  data_1.append('redirect_uri', `http://localhost:3000`); // This is the redirect URL where the user will be redirected when they finish the Discord login
+  data_1.append('scope', 'identify'); // This tells the Discord API what info you would like to retrieve. You can change this to include guilds, connections, email, etc.
+  data_1.append('code', req.body) // This is a key parameter in our upcoming request. It is the code the user got from logging in. This will help us retrieve a token which we can use to get the user's info.
+
+  fetch('https://discord.com/api/oauth2/token', { method: "POST", body: data_1 }).then(response => response.json()).then(data => { // Make a request to the Discord API with the form data, convert the response to JSON, then take it and run the following code.
+      axios.get("https://discord.com/api/users/@me", make_config(data.access_token)).then(response => { // Make a request yet again to the Discord API with the token from previously.
+          res.status(200).send(response.data.username); // Send the username with a status code 200.
+      }).catch(err => { // Handle any errors in the request (such as 401 errors).
+          console.log(err); // Log the error in the console
+          res.sendStatus(500); // Send a 500 error.
+      });
+  });
+});
 
 async function insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre) {
   try{
@@ -73,6 +108,7 @@ app.post('/create-lobby', async (req, res) => {
   try {
     const lobby = await insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre);
     res.status(201).json(lobby);
+    //insert client.emit
     
   } catch (e) {
     console.error('Error:', e);
@@ -91,6 +127,14 @@ app.delete('/remove-lobby', async (req, res) => {
   }
 })
 
+app.get('/get-user', async (req, res) => {
+  try {
+      // const user = await User.findOne({username:req.body.username}); // Find the user by their ID
+      const user = await User.findById(req.body.userId); // Find the user by their ID
+      res.status(201).json(user); // Send back the user data
+  } catch (error) {
+      res.status(400).json({ message: error.message });
+  }});
 
 app.put('/increasePlayers', async(req, res) => {
   let request = req;
@@ -100,15 +144,22 @@ app.put('/increasePlayers', async(req, res) => {
     if(lobbyName!=null){
       var lobby = await Lobby.findOne({roomTitle: lobbyName});
       console.log(lobby);
-      if(lobby.length==0) {
+      if(lobby==null) {
         return response.status(400).send({
           message: "No matching lobbies",
           error,
         });
       }
       else{
+        console.log("Comparing currentPlayers to maxPlayers")
         if(lobby.currentPlayers<lobby.maxPlayers){
           lobby.currentPlayers+=1
+          await lobby.save()
+          console.log("Updated players to: " + lobby.currentPlayers)
+          return res.status(201).send({
+            message: "Current Players increased successfully",
+            data: lobby,
+          });
         }
         else if(lobby.currentPlayers==lobby.maxPlayers){
            response.status(400).send({
@@ -134,7 +185,8 @@ app.put('/decreasePlayers', async(req, res) => {
     if(lobbyName!=null){
       var lobby = await Lobby.findOne({roomTitle: lobbyName});
       console.log(lobby);
-      if(lobby.length==0) {
+      // if(lobby.length==0) {
+      if(lobby==null) {
         return response.status(400).send({
           message: "No matching lobbies",
           error,
@@ -143,6 +195,11 @@ app.put('/decreasePlayers', async(req, res) => {
       else{
         if(lobby.currentPlayers>0){
           lobby.currentPlayers-=1
+          await lobby.save()
+          return res.status(201).send({
+            message: "Current Players decreased successfully",
+            data: lobby,
+          });
         }
         else if(lobby.currentPlayers==0){
            response.status(400).send({
@@ -160,6 +217,13 @@ app.put('/decreasePlayers', async(req, res) => {
   };
 
 })
+
+/**
+ * This attribute searches the lobbies based on query from the frontend. 
+ * It finds all the matching lobbies from mongodb, and then sorts them in ascending order.
+ * if there is no query parameter, then all the lobbies are returned as the search results.
+ * 
+ */
 app.get('/search', async(req, res)=> {
   let request = req;
   let response = res;
@@ -193,6 +257,13 @@ app.get('/search', async(req, res)=> {
   });
   
   
+  /**
+   * This endpoint filters the lobbies either by: all current lobby data, or by certain filter.
+   * The request parameters include filter query and order attribute. 
+   * The filter(rank, genre, maxPlayers) will be decided and sent from React JS frontend to here.
+   * The same goes for the order type(ascending, descending, alphabetical) if the user tries to further organize the filter results of the lobbies.
+   * The request body is: {query:, filter:, order:}
+   */
   app.get('/filter', async(req, res)=> {
     try {
     const filter = req.body.filter;
@@ -223,6 +294,11 @@ app.get('/search', async(req, res)=> {
     });
   };
 });
+
+/**
+ * User filters by popular lobbies. This endpoint retrieves all the lobbies in mongodb and sorts them by the currentPlayers attribute by descending order.
+ * Sends success and error messages accordingly.
+ */
   app.get('/popular', async(req, res)=> {
     try {
       var lobbies = await Lobby.find({}).sort([["currentPlayers", -1]])
