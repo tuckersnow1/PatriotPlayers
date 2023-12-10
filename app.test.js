@@ -6,6 +6,7 @@ const auth = require("./auth");
 const { JsonWebTokenError } = require('jsonwebtoken');
 const {ObjectId} = require('mongodb')
 const{MongoClient} = require('mongodb')
+const app = require('./app')
 jest.mock("./db/userModel");
 
 mongo_uri = process.env.DB_URL

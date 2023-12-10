@@ -1,0 +1,58 @@
+.create-page {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-top: 50px;
+}
+
+.form-container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin-top: 20px;
+}
+
+.create-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.create-form label {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.create-form input {
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.create-button, .cancel-button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  outline: none;
+}
+
+.create-button {
+  background-color: #FF5A5F;
+}
+
+.cancel-button {
+  background-color: #008489;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Add other styles as needed */

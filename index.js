@@ -1,5 +1,6 @@
 const http = require('http');
 const app = require('./app');
+// const app = require('./appv2')
 // const client = require('./bot.js'); 
 // const test = require('./bottests.js'); 
 
@@ -7,7 +8,6 @@ const normalizePort = val => {
   const port = parseInt(val, 10);
 
   if (isNaN(port)) {
-    return val;
   }
   if (port >= 0) {
     return port;
