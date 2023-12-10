@@ -52,9 +52,9 @@ function App() {
       <div className="game-card-container">
         {gameSessions.map((session) => (
           <div key={session.id} className="game-card">
-            <h3>{session.roomTitle}</h3>
-            <h3>{session.gameTitle}</h3>
-            <p>{session.rank}</p>
+            <h3>Room: {session.roomTitle}</h3>
+            <h3>Game: {session.gameTitle}</h3>
+            <p>Rank: {session.rank}</p>
             <p>Current Players: {session.currentPlayers}</p>
 
             <p>Lobby Capacity: {session.maxPlayers} Players</p>
