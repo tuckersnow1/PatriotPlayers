@@ -1,14 +1,31 @@
 import React from 'react';
+import {useState} from 'react';
+import {useEffect} from 'react';
+import axios from 'axios';
 import './index.css';
 
 function App() {
   // Dummy data for game sessions
-  const gameSessions = [
-    { id: 1, roomTitle: "Let's play Rainbow Six Siege", gameTitle: "Rainbow Six Siege", rank: "Prestige", maxPlayers: 15 },
-    { id: 2, roomTitle: "Let's play Call of Duty", gameTitle: "Call of Duty", rank:"Amateur", maxPlayers: 25 },
+  const [gameSessions, setGameSessions] = useState(
+    [{ id: 1, roomTitle: "Let's play Rainbow Six Siege", gameTitle: "Rainbow Six Siege", body:"Mason Students playing Rainbow Six", genre: "Adventure",rank: "Prestige", maxPlayers: 15 },
+    { id: 2, roomTitle: "Let's play Call of Duty", gameTitle: "Call of Duty", body:"Mason Students playing COD", genre:"RPG", rank:"Amateur", maxPlayers: 25 },]
     // ... add more game sessions as needed
-  ];
+  );
+  useEffect(() => {
+    // Fetch current lobbies when the component mounts
+    fetchLobbies();
+  }, []);
 
+  const fetchLobbies = async () => {
+    try {
+      // Make a GET request to fetch lobbies
+      const response = await axios.get('http://localhost:3000/search');
+      const lobbies = response.data; // Assuming the response contains an array of lobby data
+      setGameSessions(lobbies); // Update gameSessions state with the fetched lobbies
+    } catch (error) {
+      console.error('Error fetching lobbies:', error);
+    }
+  };
   return (
     <div className="app">
       <header className="header">

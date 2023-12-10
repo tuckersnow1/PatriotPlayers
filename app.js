@@ -229,7 +229,7 @@ app.post('/create-lobby', async (req, res) => {
   try {
     const lobby = await insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre);
     res.status(201).json(lobby);
-    discordClient.emit('channel', roomTitle, 'voice', 'create');
+    // discordClient.emit('channel', roomTitle, 'voice', 'create');
     
   } catch (e) {
     console.error('Error:', e);

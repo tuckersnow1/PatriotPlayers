@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import './CreatePage.css';
 import axios from 'axios';
-
+import { useLobbyContext } from './LobbyContext';
 function CreatePage() {
+  const {updateLobbies} = useLobbyContext();
   const [formData, setFormData] = useState({
     roomTitle: '',
     gameTitle: '',
@@ -20,6 +21,7 @@ function CreatePage() {
     e.preventDefault();
     try {
       const response = await axios.post('http://localhost:3000/create-lobby', formData);
+      updateLobbies(response.data)
       console.log(response.data);
     } catch (error) {
       console.error('Error submitting form:', error);
