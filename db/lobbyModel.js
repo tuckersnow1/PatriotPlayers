@@ -1,5 +1,11 @@
 const mongoose = require("mongoose");
-
+/**
+ * Defined Schema for Lobbies.
+ * roomTitle, gameTitle, genre, rank, and maxPlayers are all required Attributes.
+ * body and currentPlayers are not required.
+ * autoDate is set to the current date by default.
+ * RoomTitles are unique.
+ */
 const LobbySchema = new mongoose.Schema({
 	roomTitle: {
 		type: String,
@@ -10,7 +16,7 @@ const LobbySchema = new mongoose.Schema({
 		type: String,
 		required: [true, "Please provide an gameTitle!"],
 		unique: false,
-},
+	},
 	body:{
 		type:String,
 		required:false,
@@ -28,7 +34,7 @@ const LobbySchema = new mongoose.Schema({
 	},
 	maxPlayers:{
 		type: Number,
-		required: "Please enter in number of max players for lobby",
+		required: [true, "Please enter in the maximum number of players for the lobby"],
 		unique:false,
 	},
 	currentPlayers:{
