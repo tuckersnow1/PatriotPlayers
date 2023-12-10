@@ -7,8 +7,8 @@ import './index.css';
 function App() {
   // Dummy data for game sessions
   const [gameSessions, setGameSessions] = useState(
-    [{ id: 1, roomTitle: "Let's play Rainbow Six Siege", gameTitle: "Rainbow Six Siege", body:"Mason Students playing Rainbow Six", genre: "Adventure",rank: "Prestige", maxPlayers: 15 },
-    { id: 2, roomTitle: "Let's play Call of Duty", gameTitle: "Call of Duty", body:"Mason Students playing COD", genre:"RPG", rank:"Amateur", maxPlayers: 25 },]
+    [{ id: 1, roomTitle: "Let's play Rainbow Six Siege", gameTitle: "Rainbow Six Siege", body:"Mason Students playing Rainbow Six", genre: "Adventure",rank: "Prestige",currentPlayers: 5, maxPlayers: 15 },
+    { id: 2, roomTitle: "Let's play Call of Duty", gameTitle: "Call of Duty", body:"Mason Students playing COD", genre:"RPG", rank:"Amateur", currentPlayers: 10, maxPlayers: 25 },]
     // ... add more game sessions as needed
   );
   useEffect(() => {
@@ -16,6 +16,14 @@ function App() {
     fetchLobbies();
   }, []);
 
+  const handleJoin = async (lobbyName) => {
+    try {
+      await axios.put('http://localhost:3000/increasePlayers', { lobbyName });
+      fetchLobbies(); // Fetch updated lobby after increasePlayers
+    } catch (error) {
+      console.error('Error joining lobby:', error);
+    }
+  };
   const fetchLobbies = async () => {
     try {
       // Make a GET request to fetch lobbies
@@ -47,8 +55,10 @@ function App() {
             <h3>{session.roomTitle}</h3>
             <h3>{session.gameTitle}</h3>
             <p>{session.rank}</p>
-            <p>{session.maxPlayers} Players</p>
-            <button className="joinButton">Join!</button>
+            <p>Current Players: {session.currentPlayers}</p>
+
+            <p>Lobby Capacity: {session.maxPlayers} Players</p>
+            <button className="joinButton" onClick={() => handleJoin(session.roomTitle)}>Join!</button>
           </div>
         ))}
       </div>

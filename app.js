@@ -286,7 +286,7 @@ app.put('/increasePlayers', async(req, res) => {
     let lobbyName = request.body.lobbyName;
     if(lobbyName!=null){
       var lobby = await Lobby.findOne({roomTitle: lobbyName});
-      console.log(lobby);
+      // console.log(lobby);
       if(lobby==null) {
         return response.status(400).send({
           message: "No matching lobbies",
@@ -305,9 +305,15 @@ app.put('/increasePlayers', async(req, res) => {
           });
         }
         else if(lobby.currentPlayers==lobby.maxPlayers){
-           response.status(400).send({
+          console.log("Equals capacity")
+          lobby.currentPlayers+=0
+           await lobby.save()
+           return response.status(201).send({
             message: "Cannot be added because lobby has reached max capacity. Please wait or join another lobby",
           });
+        }
+        else{
+          console.log("None of the following!")
         }
       }
     }
@@ -379,7 +385,7 @@ app.get('/search', async(req, res)=> {
     if(query!=null){
       var lobbies = await Lobby.find(query).sort({"roomTitle":1})
       // var lobbies = await Lobby.find(query).sort({filter: 1});
-      console.log(lobbies);
+      // console.log(lobbies);
       if(lobbies.length==0) {
         return response.status(400).send({
           message: "No matching lobbies",

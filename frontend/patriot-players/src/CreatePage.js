@@ -55,6 +55,9 @@ function CreatePage() {
 
           <label htmlFor="rank">Rank</label>
           <input type="number" id="rank" name="rank" placeholder="Enter rank" onChange={handleChange} />
+{/* 
+          <label htmlFor="currentPlayers">Current Players</label>
+          <input type="number" id="currentPlayers" name="currentPlayers" placeholder="Enter lobby capacity" onChange={handleChange} /> */}
 
           <label htmlFor="maxPlayers">Maximum Players</label>
           <input type="number" id="maxPlayers" name="maxPlayers" placeholder="Enter lobby capacity" onChange={handleChange} />
