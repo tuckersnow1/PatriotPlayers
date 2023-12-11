@@ -1,8 +1,8 @@
 const http = require('http');
 const app = require('./app');
 // const app = require('./appv2')
-// const client = require('./bot.js'); 
-// const test = require('./bottests.js'); 
+const client = require('./bot.js'); 
+const test = require('./bottests.js'); 
 
 const normalizePort = val => {
   const port = parseInt(val, 10);
@@ -48,21 +48,21 @@ server.on('listening', () => {
 
 server.listen(port);
 
-// //discord bot event listeners
-// client.on('ready', () => {
-//   client.events.get('ready').execute(client);
-// });
+//discord bot event listeners
+client.on('ready', () => {
+  client.events.get('ready').execute(client);
+});
 
-// client.on('messageCreate', message => {
-//   client.events.get('message').execute(client, message);
-// });
+client.on('messageCreate', message => {
+  client.events.get('message').execute(client, message);
+});
 
-// client.on('sendDm', (msg_tosend, userid) => {
-//   client.events.get('dm').execute(client, msg_tosend, userid);
-// });
+client.on('sendDm', (msg_tosend, userid) => {
+  client.events.get('dm').execute(client, msg_tosend, userid);
+});
 
-// client.on('channel', (channel_name, channel_type, action) => {
-//   client.events.get('channel').execute(client, channel_name, channel_type, action);
-// });
+client.on('channel', (channel_name, channel_type, action) => {
+  client.events.get('channel').execute(client, channel_name, channel_type, action);
+});
 
 // // test()

@@ -6,6 +6,7 @@ import './index.css';
 
 function App() {
   // Dummy data for game sessions
+  const [searchQuery, setSearchQuery] = useState('');
   const [gameSessions, setGameSessions] = useState(
     [{ id: 1, roomTitle: "Let's play Rainbow Six Siege", gameTitle: "Rainbow Six Siege", body:"Mason Students playing Rainbow Six", genre: "Adventure",rank: "Prestige",currentPlayers: 5, maxPlayers: 15 },
     { id: 2, roomTitle: "Let's play Call of Duty", gameTitle: "Call of Duty", body:"Mason Students playing COD", genre:"RPG", rank:"Amateur", currentPlayers: 10, maxPlayers: 25 },]
@@ -16,10 +17,27 @@ function App() {
     fetchLobbies();
   }, []);
 
+  const handleSearch = async(searchQuery) => {
+    try {
+      console.log("Entered Search function")
+      const response = await axios.get('http://localhost:3000/search', {gameTitle: searchQuery});
+      const lobbies = response.data;
+      console.log(lobbies)
+      setGameSessions(lobbies);
+    } catch (error) {
+      console.error("Error finding lobby: ", error);
+    }
+  }
+  const handleButtonClick = async (e) => {
+    e.preventDefault();
+    console.log("Entered this function")
+    const curr = searchQuery;
+    handleSearch(curr);
+  };
   const handleJoin = async (lobbyName) => {
     try {
       await axios.put('http://localhost:3000/increasePlayers', { lobbyName });
-      fetchLobbies(); // Fetch updated lobby after increasePlayers
+      fetchLobbies(); 
     } catch (error) {
       console.error('Error joining lobby:', error);
     }
@@ -35,20 +53,26 @@ function App() {
     }
   };
   return (
+    
     <div className="app">
       <header className="header">
         <nav>
           <a href="/home">Home</a>
           <a href="/about">About</a>
         </nav>
-        <div>user_name</div>
+        <div>Tucker</div>
       </header>
-
       <div className="search-container">
-        <input type="text" placeholder="Search" />
-        <button>Filter</button>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Search for GameName"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <button onClick={handleButtonClick}>Search</button>
       </div>
-
+     
       <div className="game-card-container">
         {gameSessions.map((session) => (
           <div key={session.id} className="game-card">

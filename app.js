@@ -25,23 +25,6 @@ app.use(session({
   saveUninitialized: true
 }))
 
-function make_config(authorization_token) { // Define the function
-  data = { // Define "data"
-      headers: { // Define "headers" of "data"
-          "authorization": `Bearer ${authorization_token}` // Define the authorization
-      }
-  };
-  return data; // Return the created object
-}
-
-/*
-Basic endpoint for server testing.
-*/
-app.get("/", (request, response, next) => {
-  response.json({ message: "Hey! This is your server response!" });
-  next();
-});
-
 // require database connection 
 const dbConnect = require("./db/dbConnect");
 
@@ -54,29 +37,46 @@ dbConnect();
  * 2nd setHeader -> Which HTTP headers can be used.
  * 3rd setHeader -> Specifies Which HTTP methods are allowed for those requests
  * next() -> calls next method in stack.
- */
+*/
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content, Accept, Content-Type, Authorization"
-  );
-  res.setHeader(
+    );
+    res.setHeader(
     "Access-Control-Allow-Methods",
     "GET, POST, PUT, DELETE, PATCH, OPTIONS"
-  );
-  next();
-});
-
-function requireLogin(req, res, next) {
-  if (req.session && req.session.user) {
-    // User is logged in, proceed to the next middleware or route handler
-    return next();
-  } else {
-    // Redirect or send an error response if the user is not logged in
-    res.redirect('/login');
+    );
+    next();
+  });
+  
+  // function requireLogin(req, res, next) {
+//   if (req.session && req.session.user) {
+  //     // User is logged in, proceed to the next middleware or route handler
+  
+  function make_config(authorization_token) { // Define the function
+    data = { // Define "data"
+        headers: { // Define "headers" of "data"
+            "authorization": `Bearer ${authorization_token}` // Define the authorization
+        }
+    };
+    return data; // Return the created object
   }
-}
+  
+  /*
+  Basic endpoint for server testing.
+  */
+  app.get("/", (request, response, next) => {
+    response.json({ message: "Hey! This is your server response!" });
+    next();
+  });
+  //     return next();
+//   } else {
+//     // Redirect or send an error response if the user is not logged in
+//     res.redirect('/login');
+//   }
+// }
 
 app.get('/auth/discord',async(req,res)=>{
   const code=req.query.code;
@@ -103,20 +103,7 @@ app.get('/auth/discord',async(req,res)=>{
 
       }
       res.redirect('/login');
-      // return res.send(`
-      //     <div style="margin: 300px auto;
-      //     max-width: 400px;
-      //     display: flex;
-      //     flex-direction: column;
-      //     align-items: center;
-      //     font-family: sans-serif;"
-      //     >
-      //         <h3>Welcome ${user.username}</h3>
-      //         <span>Email: ${user.email}</span>
-              
-      //         <img src="${user.avatar}"/>
-      //     </div>
-      // `)
+      
 
   }catch(error){
       console.log('Error',error)
@@ -229,6 +216,9 @@ app.post('/create-lobby', async (req, res) => {
   try {
     const lobby = await insertLobby(roomTitle, gameTitle, body, maxPlayers, rank, genre);
     res.status(201).json(lobby);
+    client.emit('channel', roomTitle, 'text', 'create');                     // creates voice channel with roomTitle
+    client.emit('channel', roomTitle, 'voice', 'create');                     // creates text channel with roomTitle
+
     // discordClient.emit('channel', roomTitle, 'voice', 'create');
     
   } catch (e) {
@@ -241,7 +231,7 @@ app.post('/message-invite', async (req, res) => {
   const { message, username } = req.body;
 
   try {
-    discordClient.emit('sendDm', message, username);
+    client.emit('sendDm', message, username);
   }
   catch(error){
     res.status(400).json({message: error.message});

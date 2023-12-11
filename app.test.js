@@ -133,3 +133,145 @@ describe('POST /create-lobby', () => {
     expect(response.body.genre).toBe('Action');
   });
 });
+//test functionality of decreasePlayers when currentplayers is not 0.
+describe('PUT /decreasePlayers', () => {
+  it('Decreases player count of a lobby by 1', async () => {
+    const testLobby = insertLobby('TestDecLobby', 'Rocket League', 'body_msg', 5, 'diamond', 'cars');
+
+    await testLobby.save();
+    
+    // Send a requests to increase the number of players
+    const res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+    
+    res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+    
+    const temp = testLobby.currentPlayers;
+    
+    //currentPlayers should be 2.
+    res = await request(app)
+      .put('/decreasePlayers')
+      .send({ roomTitle: 'TestDecLobby'})
+
+    expect(res.statusCode).toBe(201);
+
+    const updatedLobby = await Lobby.findOne({ roomTitle: 'TestDecLobby'});
+    expect(updatedLobby.currentPlayers).toBe(temp+1);
+    
+    await testLobby.remove();
+  });
+});
+
+// test functionality of decreasePlayers when currentPlayers is 0;
+describe('PUT /decreasePlayers', () => {
+  it('Decreases player count of a lobby by 1', async () => {
+    const testLobby = insertLobby('TestDecLobby', 'Rocket League', 'body_msg', 5, 'diamond', 'cars');
+
+    await testLobby.save();
+    
+    //currentPlayers should be 0.
+    const res = await request(app)
+      .put('/decreasePlayers')
+      .send({ roomTitle: 'TestDecLobby'})
+
+    expect(res.statusCode).toBe(400);
+	expect(res.body.message).toEqual('Cannot be removed because lobby size is zero.');
+    const updatedLobby = await Lobby.findOne({ roomTitle: 'TestDecLobby'});
+    expect(updatedLobby.currentPlayers).toBe(0);
+    
+    await testLobby.remove();
+  });
+});
+
+//test functionality when decreasePlayers is requested for a lobby that does not exist.
+describe('PUT /decreasePlayers', () => {
+  it('Decreases player count of a lobby by 1', async () => {
+    
+    //testDecLobby is not a valid lobby.
+    const res = await request(app)
+      .put('/decreasePlayers')
+      .send({ roomTitle: 'TestDecLobby'})
+
+    expect(res.statusCode).toBe(400);
+	expect(res.body.message).toEqual('No matching lobbies');
+  });
+});
+
+// test increasePlayers when currentPlayers is below maximum
+describe('PUT /increasePlayers', () => {
+  it('Increases the player count of a lobby by 1', async () => {
+    // Create a test lobby
+    const testLobby = insertLobby('Test Lobby', 'R6S', 'body msg', 4, 'gold', 'action');
+
+    await testLobby.save();
+	
+	const temp = testLobby.currentPlayers;
+	
+    // Send a request to increase the number of players
+    const res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+
+    // Check if the response has a status code of 201
+    expect(res.statusCode).toBe(201);
+
+    // Check if the number of players in the lobby has increased
+    const updatedLobby = await Lobby.findOne({ roomTitle: 'Test Lobby' });
+    expect(updatedLobby.currentPlayers).toBe(temp+1);
+
+    // Clean up the test lobby
+    await testLobby.remove();
+  });
+});
+
+//test increasePlayers when currentPlayers is at the maximum
+describe('PUT /increasePlayers', () => {
+  it('Increases the player count of a lobby by 1', async () => {
+    // Create a test lobby
+    const testLobby = insertLobby('Test Lobby', 'R6S', 'body msg', 1, 'gold', 'action');
+
+    await testLobby.save();
+	
+    // Send a request to increase the number of players
+    const res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+	
+	const temp = testLobby.currentPlayers;
+	
+	//current players is at maximum, increasePlayers is called again.
+	res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+    
+    // Check if the response has a status code of 201
+    expect(res.statusCode).toBe(201);
+    expect(res.body.message).toEqual('Cannot be added because lobby has reached max capacity. Please wait or join another lobby');
+
+    // Check if the number of players in the lobby has not increased
+    const updatedLobby = await Lobby.findOne({ roomTitle: 'Test Lobby' });
+    expect(updatedLobby.currentPlayers).toBe(temp);
+
+    // Clean up the test lobby
+    await testLobby.remove();
+  });
+});
+
+//test increasePlayers when lobby is not found
+describe('PUT /increasePlayers', () => {
+  it('Increases the player count of a lobby by 1', async () => {
+    
+    // Send a request to increase the number of players
+    const res = await request(app)
+      .put('/increasePlayers')
+      .send({ roomTitle: 'Test Lobby'});
+	
+    // Check if the response has a status code of 400
+    expect(res.statusCode).toBe(400);
+    expect(res.body.message).toEqual('No matching lobbies');
+  });
+});
+

@@ -35,7 +35,7 @@ function CreatePage() {
           <a href="/">Home</a>
           <a href="/about">About</a>
         </nav>
-        <div>tucker</div>
+        <div>Tucker</div>
       </header>
 
       <div className="form-container">
