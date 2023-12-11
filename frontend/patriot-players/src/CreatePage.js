@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import './CreatePage.css';
 import axios from 'axios';
 import { useLobbyContext } from './LobbyContext';
+/**
+ * This page allows the user to create and enter a new lobby. It calls the useLobbyContext to obtain the props of gameSessions
+ * It also has local variable formData which has a setter.
+ * The handleChange changes the formdata based on whatever text is being typed into the text boxes
+ * Handle submit makes a request to our backend api endpoint with the form data.
+ * @returns the createPage for inserting a new Lobby
+ */
 function CreatePage() {
   const {updateLobbies} = useLobbyContext();
   const [formData, setFormData] = useState({

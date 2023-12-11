@@ -12,11 +12,16 @@ function App() {
     { id: 2, roomTitle: "Let's play Call of Duty", gameTitle: "Call of Duty", body:"Mason Students playing COD", genre:"RPG", rank:"Amateur", currentPlayers: 10, maxPlayers: 25 },]
     // ... add more game sessions as needed
   );
+  /**
+   * This method is used to fetch current lobbies when the component mounts (or is initialized)
+   */
   useEffect(() => {
-    // Fetch current lobbies when the component mounts
     fetchLobbies();
   }, []);
-
+  /*
+  This method handles sending the input query what was typed into the search bar to the search api endpoint.
+  updates the gameSessions global variable using setter.
+  */
   const handleSearch = async(searchQuery) => {
     try {
       console.log("Entered Search function")
@@ -28,12 +33,22 @@ function App() {
       console.error("Error finding lobby: ", error);
     }
   }
+  /*
+  This method passes the search query to the handle search function for the search button
+  */
   const handleButtonClick = async (e) => {
     e.preventDefault();
     console.log("Entered this function")
     const curr = searchQuery;
     handleSearch(curr);
   };
+  /**
+   * This method handles the event when a lobby is joined. 
+   * It takes in the lobbyname of the lobby on the UI that the user clicked.
+   * Then it makes a call to the increasePlayers endpoint on our backend to update the number of current players
+   * for that game in our MongoDB.
+   * @param {*} lobbyName 
+   */
   const handleJoin = async (lobbyName) => {
     try {
       await axios.put('http://localhost:3000/increasePlayers', { lobbyName });
@@ -46,7 +61,7 @@ function App() {
     try {
       // Make a GET request to fetch lobbies
       const response = await axios.get('http://localhost:3000/search');
-      const lobbies = response.data; // Assuming the response contains an array of lobby data
+      const lobbies = response.data; 
       setGameSessions(lobbies); // Update gameSessions state with the fetched lobbies
     } catch (error) {
       console.error('Error fetching lobbies:', error);
