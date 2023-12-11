@@ -51,18 +51,7 @@ app.use((req, res, next) => {
     next();
   });
   
-  // function requireLogin(req, res, next) {
-//   if (req.session && req.session.user) {
-  //     // User is logged in, proceed to the next middleware or route handler
-  
-  function make_config(authorization_token) { // Define the function
-    data = { // Define "data"
-        headers: { // Define "headers" of "data"
-            "authorization": `Bearer ${authorization_token}` // Define the authorization
-        }
-    };
-    return data; // Return the created object
-  }
+
   
   /*
   Basic endpoint for server testing.

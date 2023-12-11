@@ -11,6 +11,22 @@ jest.mock("./db/userModel");
 
 mongo_uri = process.env.DB_URL
 dbName = "Auth_PPlayers"
+describe('CORS middleware function', () => {
+  it('should set correct CORS headers', async () => {
+    const response = await request(app)
+      .get('/') 
+      .expect('Access-Control-Allow-Origin', '*')
+      .expect(
+        'Access-Control-Allow-Headers',
+        'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization'
+      )
+      .expect(
+        'Access-Control-Allow-Methods',
+        'GET, POST, PUT, DELETE, PATCH, OPTIONS'
+      );
+    expect(response.status).toBe(200);
+  });
+});
 describe('save-lobby', () => {
   let connection;
   let db;

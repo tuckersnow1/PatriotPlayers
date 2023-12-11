@@ -1,4 +1,7 @@
 import React, { useState } from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useLobbyContext } from './LobbyContext.js';
 import styled from 'styled-components';
 import './login.css'
 import DiscordSignInButton from './discordButton.js';
@@ -51,7 +54,8 @@ const Button = styled.button`
 const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-
+    // const {updateLobbies} = useLobbyContext();
+    // updateLobbies([])
     const handleSubmit = (e) => {
         e.preventDefault();
 
